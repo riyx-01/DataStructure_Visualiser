@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Play, Pause, RotateCcw, SkipForward, Terminal, 
-  Cpu, Database, ChevronRight, Activity, Box, AlertCircle, Code, Camera, RefreshCw 
+  Database, ChevronRight, Activity, Box, AlertCircle, Code, Camera, RefreshCw 
 } from 'lucide-react';
 import './CodeVisualizerPage.css';
 

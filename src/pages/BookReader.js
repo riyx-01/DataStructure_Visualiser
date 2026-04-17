@@ -8,7 +8,6 @@ import {
   Volume2, 
   VolumeX, 
   Highlighter, 
-  Home,
   Book as BookIcon,
   MousePointer2
 } from 'lucide-react';
@@ -131,7 +130,6 @@ const BookReader = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isOpened, setIsOpened] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [highlights, setHighlights] = useState([]);
   const [activeTool, setActiveTool] = useState('pointer'); // 'pointer' or 'highlighter'
   
   const book = BOOK_DATA[type] || BOOK_DATA.array;

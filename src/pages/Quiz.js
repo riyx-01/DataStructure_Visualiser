@@ -99,7 +99,7 @@ const Quiz = () => {
   };
 
   const nextQuestion = () => {
-    if (currentIdx < QUIZ_QUESTIONS.length - 1) {
+    if (currentIdx < quizQuestions.length - 1) {
       setCurrentIdx(currentIdx + 1);
       setSelectedOption(null);
       setIsAnswered(false);
@@ -239,7 +239,7 @@ const Quiz = () => {
               className="quiz-footer"
             >
               <button className="quiz-btn next-btn" onClick={nextQuestion}>
-                {currentIdx < QUIZ_QUESTIONS.length - 1 ? 'Next Question' : 'Finish Quiz'} <ArrowRight size={18} />
+                {currentIdx < quizQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'} <ArrowRight size={18} />
               </button>
             </motion.div>
           )}
