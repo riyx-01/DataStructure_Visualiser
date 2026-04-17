@@ -1,0 +1,337 @@
+.reader-container {
+  min-height: 100vh;
+  background: #0f172a;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.reader-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+  z-index: -1;
+}
+
+.reader-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  filter: blur(60px);
+}
+
+/* Nav Styles */
+.reader-nav {
+  height: 70px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+  z-index: 100;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.skeuo-btn {
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  color: white;
+  border-top: 1px solid #475569;
+  box-shadow: 
+    0 4px 6px rgba(0,0,0,0.3),
+    inset 0 1px 2px rgba(255,255,255,0.1);
+}
+
+.nav-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.nav-tools {
+  display: flex;
+  gap: 12px;
+}
+
+.tool-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tool-btn.active {
+  background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+  border-color: #34d399;
+}
+
+.tool-btn.speaking {
+  animation: pulse-border 1.5s infinite;
+  color: #10b981;
+}
+
+@keyframes pulse-border {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Book Animation */
+.book-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 2000px;
+  padding: 40px;
+}
+
+.book-wrapper {
+  width: 1000px;
+  height: 650px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+}
+
+.book-wrapper.opened {
+  transform: translateX(25%);
+}
+
+.book-cover {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+  left: 0;
+  z-index: 10;
+  transform-origin: left;
+  transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-radius: 4px 16px 16px 4px;
+  box-shadow: inset -10px 0 20px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opened .book-cover {
+  transform: rotateY(-180deg);
+}
+
+.cover-inner {
+  text-align: center;
+  color: #fff;
+  padding: 40px;
+  border: 4px solid rgba(255,255,255,0.1);
+  margin: 20px;
+  height: calc(100% - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-title h1 {
+  font-size: 3rem;
+  margin: 20px 0;
+  font-family: 'Georgia', serif;
+}
+
+.book-page {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background: #fdfaf0;
+  border: 1px solid #e5e7eb;
+  padding: 50px;
+  box-sizing: border-box;
+}
+
+.left-page {
+  left: 0;
+  border-radius: 4px 0 0 4px;
+  box-shadow: inset 10px 0 30px rgba(0,0,0,0.1);
+}
+
+.right-page {
+  right: 0;
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset -10px 0 30px rgba(0,0,0,0.1);
+}
+
+/* Page Content */
+.page-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e11d48;
+  padding-bottom: 10px;
+}
+
+.chapter-tag {
+  color: #e11d48;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.page-header h2 {
+  color: #1e1b4b;
+  font-size: 2rem;
+  font-family: 'Georgia', serif;
+  margin-top: 5px;
+}
+
+.main-text {
+  color: #334155;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  font-family: 'Georgia', serif;
+}
+
+.visual-preview {
+  margin-bottom: 24px;
+}
+
+.visual-preview img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  border: 4px solid #fff;
+}
+
+.fact-box {
+  background: #f1f5f9;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 6px solid #10b981;
+}
+
+.fact-box h4 {
+  color: #1e1b4b;
+  margin: 0 0 8px 0;
+}
+
+.page-number {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #94a3b8;
+  font-weight: bold;
+}
+
+/* Controls */
+.reader-controls {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+  pointer-events: none;
+}
+
+.arrow-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  color: #1e293b;
+  transition: all 0.2s;
+}
+
+.arrow-btn:hover {
+  background: #10b981;
+  color: white;
+  transform: scale(1.1);
+}
+
+.arrow-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Assistant Avatar */
+.assistant-avatar {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  width: 80px;
+  height: 80px;
+  z-index: 200;
+}
+
+.assistant-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 4px solid #10b981;
+  position: relative;
+}
+
+.speech-bubble {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  width: 250px;
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  color: #1e1b4b;
+  font-weight: 600;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  display: none;
+}
+
+.assistant-avatar:hover .speech-bubble {
+  display: block;
+}
+
+.assistant-avatar.active .speech-bubble {
+  display: block;
+}
+
+.book-highlight {
+  background: rgba(251, 191, 36, 0.4);
+  border-bottom: 2px solid #f59e0b;
+}
