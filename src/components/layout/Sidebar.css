@@ -4,18 +4,31 @@
   top: 0;
   width: 260px;
   height: 100vh;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(10px);
-  border-right: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(11, 12, 16, 0.95);
+  border-right: 1px solid #0FF0FC;
+  box-shadow: 4px 0 15px rgba(0, 243, 255, 0.1);
   display: flex;
   flex-direction: column;
   z-index: 1000;
   overflow-y: auto;
 }
 
+.sidebar::after {
+  content: 'NETWORK_LINK_ACTIVE';
+  position: absolute;
+  top: 50%;
+  left: -90px;
+  transform: rotate(-90deg);
+  color: rgba(0, 243, 255, 0.2);
+  font-size: 10px;
+  letter-spacing: 4px;
+  pointer-events: none;
+}
+
 .sidebar-header {
   padding: 24px;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+  background: rgba(0, 243, 255, 0.05);
 }
 
 .logo {
@@ -25,16 +38,18 @@
 }
 
 .logo-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #10b981, #39ff14);
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid #FF003C;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
-  font-size: 20px;
-  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  color: #FF003C;
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.4);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 
 .logo-text {
@@ -44,16 +59,18 @@
 
 .brand {
   font-size: 20px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #10b981, #39ff14);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+  color: #FFF;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px #0FF0FC;
 }
 
 .tagline {
-  font-size: 12px;
-  color: #9ca3af;
-  font-weight: 500;
+  font-size: 10px;
+  color: #0FF0FC;
+  letter-spacing: 2px;
+  margin-top: 2px;
 }
 
 .user-profile-mini {
@@ -61,20 +78,22 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  border-bottom: 1px solid rgba(0, 243, 255, 0.2);
 }
 
 .avatar {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  background: transparent;
+  border: 1px solid #FCEE09;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: bold;
   font-size: 18px;
-  color: white;
+  color: #FCEE09;
+  box-shadow: inset 0 0 10px rgba(252, 238, 9, 0.3);
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
 }
 
 .user-info {
@@ -83,44 +102,61 @@
 }
 
 .user-info .name {
-  font-weight: 700;
-  color: #f3f4f6;
-  font-size: 15px;
+  font-weight: bold;
+  color: #E0FCFF;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .user-info .email {
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: 11px;
+  color: #A3B1C6;
 }
 
 .main-nav {
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  color: #9ca3af;
+  padding: 10px 16px;
+  color: #A3B1C6;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+  border: 1px solid transparent;
   transition: all 0.2s;
+  position: relative;
 }
 
 .nav-item:hover {
-  background: rgba(139, 92, 246, 0.1);
-  color: #e2e8f0;
+  background: rgba(0, 243, 255, 0.05);
+  border-color: rgba(0, 243, 255, 0.3);
+  color: #0FF0FC;
+  transform: translateX(5px);
 }
 
 .nav-item.active {
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.1));
-  color: #10b981;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(0, 243, 255, 0.1);
+  color: #0FF0FC;
+  border-color: #0FF0FC;
+  box-shadow: inset 5px 0 0 #0FF0FC;
+}
+
+.nav-item.active::after {
+  content: '◄';
+  position: absolute;
+  right: 10px;
+  color: #0FF0FC;
+  font-size: 10px;
 }
 
 .ds-section {
@@ -129,60 +165,81 @@
 }
 
 .ds-section h3 {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #6b7280;
+  color: #FF003C;
   margin-bottom: 12px;
   padding-left: 12px;
+  letter-spacing: 3px;
 }
 
 .ds-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
 }
 
 .ds-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: #9ca3af;
+  padding: 8px 12px;
+  color: #A3B1C6;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   transition: all 0.2s;
+  border-left: 2px solid transparent;
 }
 
 .ds-item:hover {
-  background: rgba(139, 92, 246, 0.1);
-  color: #e2e8f0;
+  background: rgba(252, 238, 9, 0.05);
+  color: #FCEE09;
+  border-left: 2px solid #FCEE09;
+  padding-left: 16px;
 }
 
 .ds-item.active {
-  background: rgba(139, 92, 246, 0.15);
-  color: #34d399;
-  border-left: 3px solid #10b981;
+  background: rgba(252, 238, 9, 0.1);
+  color: #FCEE09;
+  border-left: 2px solid #FCEE09;
+  padding-left: 16px;
+  text-shadow: 0 0 5px #FCEE09;
 }
 
 .logout-btn {
   margin: 16px;
   padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: transparent;
+  border: 1px solid #FF003C;
+  color: #FF003C;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-weight: 600;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 0, 60, 0.2), transparent);
+  transition: left 0.3s;
+}
+
+.logout-btn:hover::before {
+  left: 100%;
 }
 
 .logout-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(255, 0, 60, 0.1);
+  box-shadow: 0 0 15px rgba(255, 0, 60, 0.4);
 }

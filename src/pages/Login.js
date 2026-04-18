@@ -4,22 +4,43 @@ import { Database, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import './Login.css';
 
 const Login = ({ onLogin }) => {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate API call
+    // Get stored users
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+
     setTimeout(() => {
-      onLogin({ 
-        name: 'Riya Vinod Thakur', 
-        email: email || 'riya@gmail.com',
-        avatar: 'R'
-      });
+      if (isSignUp) {
+        // Sign Up Flow
+        if (users.find(u => u.email === email)) {
+          setError('User already exists with this email.');
+          setIsLoading(false);
+          return;
+        }
+        const newUser = { name, email, password, avatar: name[0].toUpperCase() };
+        users.push(newUser);
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+        onLogin(newUser);
+      } else {
+        // Login Flow
+        const user = users.find(u => u.email === email && u.password === password);
+        if (user || (email === 'riya@gmail.com' && password === '12345')) {
+          onLogin(user || { name: 'Riya Vinod Thakur', email: 'riya@gmail.com', avatar: 'R' });
+        } else {
+          setError('Invalid email or password.');
+        }
+      }
       setIsLoading(false);
     }, 1000);
   };
@@ -41,11 +62,26 @@ const Login = ({ onLogin }) => {
           <div className="login-logo">
             <Database size={32} color="#10b981" />
           </div>
-          <h1>Welcome Back</h1>
-          <p>Sign in to continue learning</p>
+          <h1>{isSignUp ? 'Create Account' : 'Welcome Back'}</h1>
+          <p>{isSignUp ? 'Start your learning journey today' : 'Sign in to continue learning'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
+          {isSignUp && (
+            <div className="input-group">
+              <label>Full Name</label>
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          )}
+
           <div className="input-group">
             <label>Email Address</label>
             <div className="input-wrapper">
@@ -81,57 +117,26 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
 
-          <div className="form-options">
-            <label className="remember-me">
-              <input type="checkbox" />
-              <span>Remember me</span>
-            </label>
-            <a href="#" className="forgot-password">Forgot Password?</a>
-          </div>
+          {error && <div className="login-error-msg">{error}</div>}
 
           <button 
             type="submit" 
             className={`login-btn ${isLoading ? 'loading' : ''}`}
             disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
           </button>
         </form>
 
         <div className="login-footer">
-          <p>Don't have an account? <a href="#">Sign up</a></p>
+          <p>
+            {isSignUp ? 'Already have an account?' : "Don't have an account?"} 
+            <button onClick={() => setIsSignUp(!isSignUp)} className="toggle-auth">
+              {isSignUp ? 'Sign In' : 'Sign Up'}
+            </button>
+          </p>
         </div>
       </motion.div>
-
-      <div className="login-features">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="feature-item"
-        >
-          <h3>Visual Learning</h3>
-          <p>Interactive animations for complex data structures</p>
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          className="feature-item"
-        >
-          <h3>Code Execution</h3>
-          <p>Step-through debugger for JavaScript algorithms</p>
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-          className="feature-item"
-        >
-          <h3>Quiz & Assess</h3>
-          <p>Test your knowledge with interactive quizzes</p>
-        </motion.div>
-      </div>
     </div>
   );
 };

@@ -3,42 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 import './Quiz.css';
 
-const QUIZ_QUESTIONS = [
-  {
-    topic: 'Arrays & Strings',
-    question: 'What is the time complexity of accessing an element in an array by its index?',
-    options: ['O(1)', 'O(n)', 'O(log n)', 'O(n^2)'],
-    answer: 0,
-    explanation: 'Arrays store elements in contiguous memory locations, allowing O(1) direct access via mathematical offset calculation.'
-  },
-  {
-    topic: 'Stack',
-    question: 'Which principle does a Stack data structure follow?',
-    options: ['First In First Out (FIFO)', 'Last In First Out (LIFO)', 'First In Last Out (FILO)', 'Both B and C'],
-    answer: 3,
-    explanation: 'A stack follows Last-In-First-Out (LIFO), which is synonymous with First-In-Last-Out (FILO).'
-  },
-  {
-    topic: 'Queue',
-    question: 'Which of the following is an application of a Queue?',
-    options: ['Undo mechanism in text editors', 'Browser history', 'Task scheduling in operating systems', 'Evaluating postfix expressions'],
-    answer: 2,
-    explanation: 'Task scheduling generally uses Queue (FIFO) to serve requests in the exact order they arrive.'
-  },
-  {
-    topic: 'Trees',
-    question: 'What is the maximum number of children a node can have in a Binary Tree?',
-    options: ['1', '2', '3', 'Any number'],
-    answer: 1,
-    explanation: 'In a binary tree, each node can have at most two children, referred to as the left child and the right child.'
-  },
-  {
-    topic: 'Sorting',
-    question: 'Which sorting algorithm has the best average-case time complexity?',
-    options: ['Bubble Sort', 'Insertion Sort', 'Merge Sort', 'Selection Sort'],
-    answer: 2,
-    explanation: 'Merge sort has an average and worst-case time complexity of O(n log n), which is optimal among these choices.'
-  }
+const QUIZ_BANK = [
+  { topic: 'Arrays', question: 'In Python, what is the default time complexity to append an item to a list?', options: ['O(1)', 'O(n)', 'O(log n)', 'O(1) amortized'], answer: 3, explanation: 'Appending to a list in Python is O(1) most of the time, but occasionally O(n) when resizing occurs, making it O(1) amortized.' },
+  { topic: 'Arrays', question: 'What happens in Java when you access an array index out of bounds?', options: ['Returns undefined', 'Returns null', 'Throws ArrayIndexOutOfBoundsException', 'Memory corruption'], answer: 2, explanation: 'Java is a memory-safe language and will throw a runtime exception if you access an invalid index.' },
+  { topic: 'Linked List', question: 'In a doubly linked list, how many pointers does each node have?', options: ['1', '2', '3', 'None'], answer: 1, explanation: 'Each node stores a "next" pointer and a "previous" pointer.' },
+  { topic: 'Stack', question: 'Which operation is used to add an element to a Stack?', options: ['Enqueue', 'Push', 'Pop', 'Insert'], answer: 1, explanation: 'The "Push" operation adds an item to the top of the stack.' },
+  { topic: 'JavaScript', question: 'What is the time complexity of Array.prototype.shift() in JavaScript?', options: ['O(1)', 'O(n)', 'O(log n)', 'O(n^2)'], answer: 1, explanation: 'Shifting requires re-indexing all subsequent elements, making it O(n).' },
+  { topic: 'Python', question: 'Which data structure is the Python "dict" based on?', options: ['Array', 'Linked List', 'Hash Table', 'Binary Tree'], answer: 2, explanation: 'Python dictionaries use hash tables for O(1) average lookup.' },
+  { topic: 'Queue', question: 'A queue that allows insertion and deletion from both ends is called?', options: ['Priority Queue', 'Circular Queue', 'Deque', 'Stack'], answer: 2, explanation: 'A Deque (Double-Ended Queue) allows LIFO and FIFO behaviors.' },
+  { topic: 'C++', question: 'What does std::vector::at(i) do that operator[] does not?', options: ['Nothing', 'Bounds checking', 'Faster access', 'Memory clearing'], answer: 1, explanation: '.at() performs bounds checking and throws an out_of_range exception if invalid.' },
+  { topic: 'Trees', question: 'In a Binary Search Tree (BST), what is the relationship between a node and its left child?', options: ['Left child is larger', 'Left child is smaller', 'No relationship', 'Both are equal'], answer: 1, explanation: 'In a BST, all nodes in the left subtree are smaller than the parent node.' },
+  { topic: 'Java', question: 'Which interface in Java provides the base for Stack and Queue behaviors?', options: ['List', 'Map', 'Collection', 'Set'], answer: 2, explanation: 'Both are part of the Java Collections Framework.' },
+  { topic: 'Algorithms', question: 'Which sorting algorithm has a worst-case O(n^2)?', options: ['Quick Sort', 'Merge Sort', 'Heap Sort', 'Timsort'], answer: 0, explanation: 'Quick Sort is O(n^2) in the worst case (e.g., sorted array with poor pivot), though it is O(n log n) on average.' },
+  { topic: 'Hash Table', question: 'What is a "collision" in a Hash Table?', options: ['Two identical keys', 'Two keys hashing to the same index', 'The table is full', 'A memory leak'], answer: 1, explanation: 'A collision occurs when the hash function generates the same index for different keys.' }
 ];
 
 const Quiz = () => {
@@ -48,39 +25,17 @@ const Quiz = () => {
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   
-  const [quizQuestions, setQuizQuestions] = useState(QUIZ_QUESTIONS);
+  const [quizQuestions, setQuizQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchQuestions = () => {
     setIsLoading(true);
-    fetch('https://opentdb.com/api.php?amount=10&category=18&type=multiple')
-      .then(res => res.json())
-      .then(data => {
-        if (data.response_code === 0 && data.results.length > 0) {
-          const formatted = data.results.map(q => {
-            const ops = [...q.incorrect_answers];
-            const ansIdx = Math.floor(Math.random() * 4);
-            ops.splice(ansIdx, 0, q.correct_answer);
-            
-            const decode = (str) => {
-              const txt = document.createElement("textarea");
-              txt.innerHTML = str;
-              return txt.value;
-            };
-
-            return {
-              topic: 'Computer Science',
-              question: decode(q.question),
-              options: ops.map(decode),
-              answer: ansIdx,
-              explanation: `The correct answer is "${decode(q.correct_answer)}".`
-            };
-          });
-          setQuizQuestions(formatted);
-        }
-      })
-      .catch(err => console.error("Failed to fetch questions, using fallback.", err))
-      .finally(() => setIsLoading(false));
+    // Simulate specialized random fetch from local bank for uniqueness
+    setTimeout(() => {
+      const shuffled = [...QUIZ_BANK].sort(() => 0.5 - Math.random());
+      setQuizQuestions(shuffled.slice(0, 10)); // Pick 10 random
+      setIsLoading(false);
+    }, 800);
   };
 
   useEffect(() => {

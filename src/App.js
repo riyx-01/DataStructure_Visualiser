@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
@@ -14,8 +14,19 @@ import BookReader from './pages/BookReader'; // New Import
 import './App.css';
 
 function App() {
-  // Forced signout on refresh per requested behavior
-  const [user, setUser] = useState(null);
+  // Persistent session logic
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('currentUser');
+    }
+  }, [user]);
 
   if (!user) {
     return (

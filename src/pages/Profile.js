@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Trophy, Calendar, Edit2, Check, Code } from 'lucide-react';
+import { User, Mail, Trophy, Calendar, Edit2, Check, Code, Lock } from 'lucide-react';
 import './Profile.css';
 
-const Profile = ({ user }) => {
+const Profile = ({ user, setUser }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || 'Riya Vinod Thakur');
   const [email, setEmail] = useState(user?.email || 'riya@gmail.com');
+  const [password, setPassword] = useState(user?.password || '');
 
   const [userStats, setUserStats] = useState({ visualizations: 0, quizzesTaken: 0, avgScore: 0, history: [] });
 
@@ -39,7 +40,20 @@ const Profile = ({ user }) => {
 
   const handleSave = () => {
     setIsEditing(false);
-    // Save logic here
+    
+    // 1. Update existing users database
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const updatedUsers = users.map(u => {
+      if (u.email === user.email) {
+        return { ...u, name, password };
+      }
+      return u;
+    });
+    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+
+    // 2. Update active session
+    setUser({ ...user, name, password });
+    alert('Security settings updated successfully!');
   };
 
   return (
@@ -101,6 +115,23 @@ const Profile = ({ user }) => {
               <div>
                 <label>Email</label>
                 <span>{email}</span>
+              </div>
+            </div>
+            <div className="info-item">
+              <Lock size={20} color="#10b981" />
+              <div>
+                <label>Login Password</label>
+                {isEditing ? (
+                  <input 
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="edit-input-small"
+                    placeholder="New Password"
+                  />
+                ) : (
+                  <span>••••••••</span>
+                )}
               </div>
             </div>
           </div>
