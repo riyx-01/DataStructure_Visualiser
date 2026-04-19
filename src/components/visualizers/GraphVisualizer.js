@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const GraphVisualizer = ({ data, foundIndex }) => {
+const GraphVisualizer = ({ data, foundIndex, xRayMode, memoryModel, ghostData }) => {
   // Fixed positions for 4 nodes (diamond shape)
   const positions = [
     { x: 200, y: 50 },   // 0 - top
@@ -21,6 +21,11 @@ const GraphVisualizer = ({ data, foundIndex }) => {
       width: '400px',
       height: '350px',
     }}>
+      {xRayMode && (
+        <div style={{ position: 'absolute', top: -18, left: 0, fontSize: '11px', color: '#86efac' }}>
+          {memoryModel?.cells?.slice(0, 4).map((cell) => cell.address).join(' -> ')}
+        </div>
+      )}
       {/* Edges */}
       <svg style={{
         position: 'absolute',
@@ -34,9 +39,9 @@ const GraphVisualizer = ({ data, foundIndex }) => {
             key={`edge-${idx}`}
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 0.5 }}
-            x1={positions[from].x} 
-            y1={positions[from].y} 
-            x2={positions[to].x} 
+            x1={positions[from].x}
+            y1={positions[from].y}
+            x2={positions[to].x}
             y2={positions[to].y}
             stroke="#10b981"
             strokeWidth="3"
@@ -48,16 +53,16 @@ const GraphVisualizer = ({ data, foundIndex }) => {
       {data.slice(0, 4).map((item, index) => {
         const pos = positions[index];
         const isFound = foundIndex === index;
-        
+
         return (
           <motion.div
             key={`node-${index}`}
             initial={{ scale: 0, opacity: 0 }}
-            animate={{ 
-              scale: isFound ? 1.3 : 1, 
-              opacity: 1 
+            animate={{
+              scale: isFound ? 1.3 : 1,
+              opacity: 1
             }}
-            transition={{ 
+            transition={{
               type: "spring",
               stiffness: 300,
               damping: 20,
@@ -82,7 +87,7 @@ const GraphVisualizer = ({ data, foundIndex }) => {
               boxShadow: isFound
                 ? '0 0 40px rgba(16, 185, 129, 0.7)'
                 : '0 0 30px rgba(139, 92, 246, 0.4)',
-              border: isFound 
+              border: isFound
                 ? '4px solid #34d399'
                 : '3px solid rgba(255, 255, 255, 0.2)',
               transition: 'all 0.3s ease',
@@ -93,6 +98,12 @@ const GraphVisualizer = ({ data, foundIndex }) => {
           </motion.div>
         );
       })}
+
+      {!!ghostData?.length && (
+        <div style={{ position: 'absolute', bottom: -18, left: 0, fontSize: '11px', opacity: 0.45, color: '#e2e8f0' }}>
+          ghost graph state: {ghostData.join(', ')}
+        </div>
+      )}
     </div>
   );
 };

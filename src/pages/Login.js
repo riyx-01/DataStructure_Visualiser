@@ -16,7 +16,7 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     // Get stored users
     const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
 
@@ -28,13 +28,13 @@ const Login = ({ onLogin }) => {
           setIsLoading(false);
           return;
         }
-        const newUser = { name, email, password, avatar: name[0].toUpperCase() };
-        users.push(newUser);
+        const newUser = { name, email, avatar: name[0].toUpperCase() };
+        users.push({ ...newUser, authPassword: password });
         localStorage.setItem('registeredUsers', JSON.stringify(users));
         onLogin(newUser);
       } else {
         // Login Flow
-        const user = users.find(u => u.email === email && u.password === password);
+        const user = users.find(u => u.email === email && u.authPassword === password);
         if (user || (email === 'riya@gmail.com' && password === '12345')) {
           onLogin(user || { name: 'Riya Vinod Thakur', email: 'riya@gmail.com', avatar: 'R' });
         } else {
@@ -52,7 +52,7 @@ const Login = ({ onLogin }) => {
         <div className="gradient-orb orb-2"></div>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -69,13 +69,15 @@ const Login = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="login-form">
           {isSignUp && (
             <div className="input-group">
-              <label>Full Name</label>
+              <label htmlFor="full-name">Full Name</label>
               <div className="input-wrapper">
                 <input
+                  id="full-name"
                   type="text"
                   placeholder="Your Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  aria-label="Full name"
                   required
                 />
               </div>
@@ -83,34 +85,39 @@ const Login = ({ onLogin }) => {
           )}
 
           <div className="input-group">
-            <label>Email Address</label>
+            <label htmlFor="email">Email Address</label>
             <div className="input-wrapper">
               <Mail size={20} className="input-icon" />
               <input
+                id="email"
                 type="email"
                 placeholder="riya@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                aria-label="Email address"
                 required
               />
             </div>
           </div>
 
           <div className="input-group">
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
             <div className="input-wrapper">
               <Lock size={20} className="input-icon" />
               <input
+                id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-label="Password"
                 required
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -119,8 +126,8 @@ const Login = ({ onLogin }) => {
 
           {error && <div className="login-error-msg">{error}</div>}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className={`login-btn ${isLoading ? 'loading' : ''}`}
             disabled={isLoading}
           >
@@ -130,7 +137,7 @@ const Login = ({ onLogin }) => {
 
         <div className="login-footer">
           <p>
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"} 
+            {isSignUp ? 'Already have an account?' : "Don't have an account?"}
             <button onClick={() => setIsSignUp(!isSignUp)} className="toggle-auth">
               {isSignUp ? 'Sign In' : 'Sign Up'}
             </button>

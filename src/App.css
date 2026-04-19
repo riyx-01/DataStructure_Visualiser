@@ -4,19 +4,27 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
 body {
   font-family: 'Rajdhani', 'Share Tech Mono', 'Courier New', monospace;
   background: #0B0C10;
   color: #E0FCFF;
   overflow-x: hidden;
   background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
   background-size: 30px 30px;
 }
 
 .app {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
 
 .main-content {
@@ -38,6 +46,18 @@ body {
 
 .main-content.with-sidebar {
   margin-left: 260px;
+}
+
+@media (max-width: 960px) {
+  .main-content.with-sidebar {
+    margin-left: 0;
+  }
+
+  .main-content::before {
+    right: 12px;
+    bottom: 12px;
+    letter-spacing: 3px;
+  }
 }
 
 /* Scrollbar */
@@ -93,7 +113,8 @@ body {
   box-shadow: 0 0 10px rgba(252, 238, 9, 0.2);
 }
 
-.btn-primary:active, .btn-primary:hover {
+.btn-primary:active,
+.btn-primary:hover {
   background: #FCEE09;
   color: #000;
   box-shadow: 0 0 20px #FCEE09;
@@ -113,7 +134,8 @@ body {
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
 }
 
-.btn-secondary:active, .btn-secondary:hover {
+.btn-secondary:active,
+.btn-secondary:hover {
   background: #0FF0FC;
   color: #000;
   box-shadow: 0 0 20px #0FF0FC;
@@ -130,7 +152,10 @@ body {
 .hover-card::after {
   content: '';
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 2px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
   background: #0FF0FC;
   transform: scaleX(0);
   transition: transform 0.3s;
@@ -156,7 +181,8 @@ body {
   box-shadow: 0 0 10px rgba(255, 0, 60, 0.2);
 }
 
-.skeuo-theory-btn:active, .skeuo-theory-btn:hover {
+.skeuo-theory-btn:active,
+.skeuo-theory-btn:hover {
   background: #FF003C;
   color: #FFF;
   box-shadow: 0 0 20px #FF003C;

@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const HeapVisualizer = ({ data, foundIndex }) => {
+const HeapVisualizer = ({ data, foundIndex, xRayMode, memoryModel, ghostData }) => {
   // Max heap visualization (same layout as tree)
   const levels = [];
   let index = 0;
   let levelSize = 1;
-  
+
   while (index < data.length) {
     const level = [];
     for (let i = 0; i < levelSize && index < data.length; i++) {
@@ -25,6 +25,11 @@ const HeapVisualizer = ({ data, foundIndex }) => {
       gap: '40px',
       padding: '40px',
     }}>
+      {xRayMode && (
+        <div style={{ fontSize: '11px', color: '#86efac' }}>
+          heap root addr: {memoryModel?.cells?.[0]?.address || 'n/a'}
+        </div>
+      )}
       {levels.map((level, levelIndex) => (
         <div
           key={levelIndex}
@@ -37,16 +42,16 @@ const HeapVisualizer = ({ data, foundIndex }) => {
           {level.map((item, idx) => {
             const isFound = foundIndex === item.index;
             const isRoot = item.index === 0;
-            
+
             return (
               <motion.div
                 key={`heap-${item.index}`}
                 initial={{ scale: 0, opacity: 0 }}
-                animate={{ 
-                  scale: isFound ? 1.2 : 1, 
-                  opacity: 1 
+                animate={{
+                  scale: isFound ? 1.2 : 1,
+                  opacity: 1
                 }}
-                transition={{ 
+                transition={{
                   type: "spring",
                   stiffness: 300,
                   damping: 20,
@@ -59,8 +64,8 @@ const HeapVisualizer = ({ data, foundIndex }) => {
                   background: isFound
                     ? 'linear-gradient(135deg, #10b981, #059669)'
                     : isRoot
-                    ? 'linear-gradient(135deg, #f87171, #dc2626)'
-                    : 'linear-gradient(135deg, #b91c1c, #991b1b)',
+                      ? 'linear-gradient(135deg, #f87171, #dc2626)'
+                      : 'linear-gradient(135deg, #b91c1c, #991b1b)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -70,9 +75,9 @@ const HeapVisualizer = ({ data, foundIndex }) => {
                   boxShadow: isFound
                     ? '0 0 30px rgba(16, 185, 129, 0.6)'
                     : isRoot
-                    ? '0 0 30px rgba(248, 113, 113, 0.4)'
-                    : '0 4px 15px rgba(185, 28, 28, 0.3)',
-                  border: isFound 
+                      ? '0 0 30px rgba(248, 113, 113, 0.4)'
+                      : '0 4px 15px rgba(185, 28, 28, 0.3)',
+                  border: isFound
                     ? '3px solid #34d399'
                     : '3px solid rgba(255, 255, 255, 0.2)',
                   transition: 'all 0.3s ease',
@@ -84,6 +89,12 @@ const HeapVisualizer = ({ data, foundIndex }) => {
           })}
         </div>
       ))}
+
+      {!!ghostData?.length && (
+        <div style={{ fontSize: '11px', opacity: 0.45, color: '#e2e8f0' }}>
+          ghost heap size: {ghostData.length}
+        </div>
+      )}
     </div>
   );
 };
