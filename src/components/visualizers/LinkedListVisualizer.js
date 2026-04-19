@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
-const LinkedListVisualizer = ({ data, searchIndex, isSearching, foundIndex }) => {
+const LinkedListVisualizer = ({ data, searchIndex, isSearching, foundIndex, xRayMode, memoryModel, ghostData, ghostSearchIndex }) => {
   return (
     <div style={{
       display: 'flex',
@@ -17,16 +17,16 @@ const LinkedListVisualizer = ({ data, searchIndex, isSearching, foundIndex }) =>
         const isChecking = isSearching && searchIndex === index && foundIndex === null;
         const isFound = foundIndex === index;
         const wasChecked = isSearching && searchIndex !== null && index < searchIndex;
-        
+
         return (
           <React.Fragment key={`node-${index}`}>
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
-              animate={{ 
-                scale: isFound ? 1.15 : isChecking ? 1.1 : 1, 
-                opacity: 1 
+              animate={{
+                scale: isFound ? 1.15 : isChecking ? 1.1 : 1,
+                opacity: 1
               }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 20,
@@ -46,12 +46,12 @@ const LinkedListVisualizer = ({ data, searchIndex, isSearching, foundIndex }) =>
                 background: isFound
                   ? 'linear-gradient(135deg, #10b981, #059669)'
                   : isChecking
-                  ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-                  : wasChecked
-                  ? 'linear-gradient(135deg, #4b5563, #374151)'
-                  : index === data.length - 1
-                  ? 'linear-gradient(135deg, #f472b6, #ec4899)'
-                  : 'linear-gradient(135deg, #be185d, #9d174d)',
+                    ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+                    : wasChecked
+                      ? 'linear-gradient(135deg, #4b5563, #374151)'
+                      : index === data.length - 1
+                        ? 'linear-gradient(135deg, #f472b6, #ec4899)'
+                        : 'linear-gradient(135deg, #be185d, #9d174d)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -61,13 +61,13 @@ const LinkedListVisualizer = ({ data, searchIndex, isSearching, foundIndex }) =>
                 boxShadow: isFound
                   ? '0 0 30px rgba(16, 185, 129, 0.6)'
                   : isChecking
-                  ? '0 0 25px rgba(245, 158, 11, 0.5)'
-                  : '0 4px 15px rgba(190, 24, 93, 0.3)',
-                border: isFound 
+                    ? '0 0 25px rgba(245, 158, 11, 0.5)'
+                    : '0 4px 15px rgba(190, 24, 93, 0.3)',
+                border: isFound
                   ? '3px solid #34d399'
                   : isChecking
-                  ? '3px solid #fbbf24'
-                  : '2px solid rgba(255, 255, 255, 0.1)',
+                    ? '3px solid #fbbf24'
+                    : '2px solid rgba(255, 255, 255, 0.1)',
                 transition: 'all 0.3s ease',
               }}>
                 {item}
@@ -79,8 +79,14 @@ const LinkedListVisualizer = ({ data, searchIndex, isSearching, foundIndex }) =>
               }}>
                 Node {index}
               </span>
+              {ghostSearchIndex === index && !isChecking && (
+                <span style={{ fontSize: '10px', color: '#cbd5e1' }}>ghost pointer</span>
+              )}
+              {xRayMode && memoryModel?.cells?.[index] && (
+                <span style={{ fontSize: '10px', color: '#86efac' }}>{memoryModel.cells[index].address}</span>
+              )}
             </motion.div>
-            
+
             {index < data.length - 1 && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -98,6 +104,12 @@ const LinkedListVisualizer = ({ data, searchIndex, isSearching, foundIndex }) =>
           </React.Fragment>
         );
       })}
+
+      {!!ghostData?.length && (
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', opacity: 0.4, marginTop: '10px' }}>
+          <span style={{ fontSize: '11px', color: '#e2e8f0' }}>ghost nodes: {ghostData.length}</span>
+        </div>
+      )}
     </div>
   );
 };

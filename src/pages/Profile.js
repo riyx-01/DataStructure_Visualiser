@@ -21,8 +21,8 @@ const Profile = ({ user, setUser }) => {
       savedStats = defaultStats;
       localStorage.setItem('userStats', JSON.stringify(defaultStats));
     } else if (!savedStats.joinDate) {
-       savedStats.joinDate = defaultStats.joinDate;
-       localStorage.setItem('userStats', JSON.stringify(savedStats));
+      savedStats.joinDate = defaultStats.joinDate;
+      localStorage.setItem('userStats', JSON.stringify(savedStats));
     }
     setUserStats(savedStats);
   }, []);
@@ -39,53 +39,59 @@ const Profile = ({ user, setUser }) => {
   ];
 
   const handleSave = () => {
+    if (!name.trim() || !email.trim()) {
+      alert('Name and email are required.');
+      return;
+    }
+
     setIsEditing(false);
-    
+
     // 1. Update existing users database
     const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     const updatedUsers = users.map(u => {
       if (u.email === user.email) {
-        return { ...u, name, password };
+        return { ...u, name, email, authPassword: password || u.authPassword };
       }
       return u;
     });
     localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
     // 2. Update active session
-    setUser({ ...user, name, password });
+    setUser({ ...user, name, email });
     alert('Security settings updated successfully!');
   };
 
   return (
     <div className="profile-container">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="profile-header"
       >
         <div className="profile-avatar-section">
           <div className="profile-avatar">
-            {name[0]}
-            <button className="edit-avatar">
+            {name?.[0] || 'U'}
+            <button className="edit-avatar" aria-label="Edit profile avatar">
               <Edit2 size={16} />
             </button>
           </div>
           <div className="profile-title">
             {isEditing ? (
               <div className="edit-form">
-                <input 
-                  value={name} 
+                <input
+                  value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="edit-input"
+                  aria-label="Edit full name"
                 />
-                <button onClick={handleSave} className="save-btn">
+                <button onClick={handleSave} className="save-btn" aria-label="Save profile changes">
                   <Check size={18} />
                 </button>
               </div>
             ) : (
               <>
                 <h1>{name}</h1>
-                <button onClick={() => setIsEditing(true)} className="edit-profile-btn">
+                <button onClick={() => setIsEditing(true)} className="edit-profile-btn" aria-label="Edit profile">
                   <Edit2 size={16} /> Edit Profile
                 </button>
               </>
@@ -95,7 +101,7 @@ const Profile = ({ user, setUser }) => {
       </motion.div>
 
       <div className="profile-grid">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
@@ -114,7 +120,18 @@ const Profile = ({ user, setUser }) => {
               <Mail size={20} color="#10b981" />
               <div>
                 <label>Email</label>
-                <span>{email}</span>
+                {isEditing ? (
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="edit-input-small"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                  />
+                ) : (
+                  <span>{email}</span>
+                )}
               </div>
             </div>
             <div className="info-item">
@@ -122,7 +139,7 @@ const Profile = ({ user, setUser }) => {
               <div>
                 <label>Login Password</label>
                 {isEditing ? (
-                  <input 
+                  <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -137,7 +154,7 @@ const Profile = ({ user, setUser }) => {
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
@@ -155,7 +172,7 @@ const Profile = ({ user, setUser }) => {
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}

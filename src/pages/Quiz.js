@@ -24,7 +24,7 @@ const Quiz = () => {
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  
+
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -67,18 +67,18 @@ const Quiz = () => {
     setIsFinished(true);
     // Save to localStorage
     const savedStats = JSON.parse(localStorage.getItem('userStats')) || { visualizations: 0, quizzesTaken: 0, avgScore: 0, history: [] };
-    
+
     const percentage = Math.round((score / quizQuestions.length) * 100);
-    
+
     savedStats.quizzesTaken++;
     savedStats.avgScore = Math.round(((savedStats.avgScore * (savedStats.quizzesTaken - 1)) + percentage) / savedStats.quizzesTaken);
-    
+
     savedStats.history.unshift({
       topic: 'Random Assessment',
       score: `${percentage}%`,
       date: new Date().toLocaleDateString()
     });
-    
+
     if (savedStats.history.length > 5) savedStats.history.pop();
     localStorage.setItem('userStats', JSON.stringify(savedStats));
   };
@@ -94,8 +94,8 @@ const Quiz = () => {
 
   if (isLoading) {
     return (
-      <div className="quiz-container" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
-        <h2 style={{color: 'white'}}>Fetching fresh questions...</h2>
+      <div className="quiz-container quiz-loading-state" role="status" aria-live="polite">
+        <h2>Fetching fresh questions...</h2>
       </div>
     );
   }
@@ -104,7 +104,7 @@ const Quiz = () => {
     const percentage = Math.round((score / quizQuestions.length) * 100);
     return (
       <div className="quiz-container">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="quiz-card result-card"
@@ -115,7 +115,7 @@ const Quiz = () => {
             <span className="score-text">{percentage}%</span>
           </div>
           <p>You scored {score} out of {quizQuestions.length}</p>
-          <button onClick={restartQuiz} className="quiz-btn restart-btn">
+          <button onClick={restartQuiz} className="quiz-btn restart-btn" aria-label="Take another quiz">
             <RotateCcw size={18} /> Take Another Quiz
           </button>
         </motion.div>
@@ -133,9 +133,13 @@ const Quiz = () => {
             <span>Score: {score}</span>
           </div>
           <div className="progress-bar">
-            <div 
-              className="progress-fill" 
+            <div
+              className="progress-fill"
               style={{ width: `${((currentIdx + 1) / quizQuestions.length) * 100}%` }}
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(((currentIdx + 1) / quizQuestions.length) * 100)}
             />
           </div>
         </div>
@@ -163,11 +167,12 @@ const Quiz = () => {
               }
 
               return (
-                <button 
+                <button
                   key={idx}
                   className={btnClass}
                   onClick={() => handleSelect(idx)}
                   disabled={isAnswered}
+                  aria-label={`Select option ${idx + 1}: ${opt}`}
                 >
                   <span className="option-text">{opt}</span>
                   {isAnswered && idx === question.answer && <CheckCircle2 size={20} className="result-icon success" />}
@@ -178,7 +183,7 @@ const Quiz = () => {
           </div>
 
           {isAnswered && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`explanation ${selectedOption === question.answer ? 'exp-correct' : 'exp-incorrect'}`}
@@ -188,7 +193,7 @@ const Quiz = () => {
           )}
 
           {isAnswered && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="quiz-footer"

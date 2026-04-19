@@ -1,57 +1,56 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Play, Pause, RotateCcw, SkipForward, SkipBack, Terminal, 
-  Database, ChevronRight, Activity, Box, AlertCircle, Code, Camera, RefreshCw, Layers, Eye, Ghost, Info
+import {
+  Play, Pause, RotateCcw, SkipForward, SkipBack, Terminal,
+  Activity, AlertCircle, Code, Camera, RefreshCw, Layers, Eye, Ghost, Info
 } from 'lucide-react';
 import './CodeVisualizerPage.css';
 
 // ==================== TRANSPILER ====================
 const transpileToJS = (rawCode, language) => {
   if (language === 'javascript') return rawCode;
-  
+
   let lines = rawCode.split('\n').map(line => {
     const s = line.trim();
     if (s.match(/^(#include|using\s+namespace|namespace\s|package\s|import\s|#define)/)) return '// ' + line;
     return line;
   });
-  
+
   let newLines = [];
-  
+
   if (language === 'python') {
     let indentStack = [];
     for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-        let stripped = line.trim();
-        if (!stripped) { newLines.push(line); continue; }
-        if (stripped.startsWith('#')) { newLines.push(line.replace('#', '//')); continue; }
-        
-        let indent = line.search(/\S/);
-        let closeBraces = '';
-        while (indentStack.length > 0 && indent <= indentStack[indentStack.length - 1]) {
-            if (indent === indentStack[indentStack.length - 1] && stripped.match(/^(elif|else)\b/)) {
-                indentStack.pop(); closeBraces += '} '; break;
-            }
-            if (indent === indentStack[indentStack.length - 1]) break;
-            indentStack.pop(); closeBraces += '} ';
+      let line = lines[i];
+      let stripped = line.trim();
+      if (!stripped) { newLines.push(line); continue; }
+      if (stripped.startsWith('#')) { newLines.push(line.replace('#', '//')); continue; }
+
+      let indent = line.search(/\S/);
+      let closeBraces = '';
+      while (indentStack.length > 0 && indent <= indentStack[indentStack.length - 1]) {
+        if (indent === indentStack[indentStack.length - 1] && stripped.match(/^(elif|else)\b/)) {
+          indentStack.pop(); closeBraces += '} '; break;
         }
-        let jsLine = line;
-        if (jsLine.includes('#')) jsLine = jsLine.split('#')[0] + '//' + jsLine.split('#').slice(1).join('#');
-        jsLine = jsLine.replace(/\bprint\((.*)\)/, 'console.log($1)');
-        jsLine = jsLine.replace(/\bdef\s+(\w+)\s*\((.*?)\)\s*:/, 'function $1($2) {');
-        jsLine = jsLine.replace(/\bclass\s+(\w+)(.*?)\s*:/, 'class $1 {');
-        jsLine = jsLine.replace(/\bself\./g, 'this.');
-        jsLine = jsLine.replace(/\b__init__\b/, 'constructor');
-        jsLine = jsLine.replace(/\bfor\s+(\w+)\s+in\s+range\(\s*len\(\s*(\w+)\s*\)\s*\)\s*:/, 'for(let $1=0; $1<$2.length; $1++) {');
-        jsLine = jsLine.replace(/\bfor\s+(\w+)\s+in\s+range\(\s*(.*?)\s*\)\s*:/, 'for(let $1=0; $1<$2; $1++) {');
-        jsLine = jsLine.replace(/\bwhile\s+(.*?)\s*:/, 'while($1) {');
-        jsLine = jsLine.replace(/\bif\s+(.*?)\s*:/, 'if($1) {');
-        jsLine = jsLine.replace(/\belif\s+(.*?)\s*:/, 'else if($1) {');
-        jsLine = jsLine.replace(/\belse\s*:/, 'else {');
-        jsLine = jsLine.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false').replace(/\bNone\b/g, 'null');
-        jsLine = jsLine.replace(/\.\s*append\s*\(/g, '.push(');
-        if (jsLine.trim().endsWith('{')) indentStack.push(indent);
-        newLines.push(closeBraces + jsLine);
+        indentStack.pop(); closeBraces += '} ';
+      }
+      let jsLine = line;
+      if (jsLine.includes('#')) jsLine = jsLine.split('#')[0] + '//' + jsLine.split('#').slice(1).join('#');
+      jsLine = jsLine.replace(/\bprint\((.*)\)/, 'console.log($1)');
+      jsLine = jsLine.replace(/\bdef\s+(\w+)\s*\((.*?)\)\s*:/, 'function $1($2) {');
+      jsLine = jsLine.replace(/\bclass\s+(\w+)(.*?)\s*:/, 'class $1 {');
+      jsLine = jsLine.replace(/\bself\./g, 'this.');
+      jsLine = jsLine.replace(/\b__init__\b/, 'constructor');
+      jsLine = jsLine.replace(/\bfor\s+(\w+)\s+in\s+range\(\s*len\(\s*(\w+)\s*\)\s*\)\s*:/, 'for(let $1=0; $1<$2.length; $1++) {');
+      jsLine = jsLine.replace(/\bfor\s+(\w+)\s+in\s+range\(\s*(.*?)\s*\)\s*:/, 'for(let $1=0; $1<$2; $1++) {');
+      jsLine = jsLine.replace(/\bwhile\s+(.*?)\s*:/, 'while($1) {');
+      jsLine = jsLine.replace(/\bif\s+(.*?)\s*:/, 'if($1) {');
+      jsLine = jsLine.replace(/\belif\s+(.*?)\s*:/, 'else if($1) {');
+      jsLine = jsLine.replace(/\belse\s*:/, 'else {');
+      jsLine = jsLine.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false').replace(/\bNone\b/g, 'null');
+      jsLine = jsLine.replace(/\.\s*append\s*\(/g, '.push(');
+      if (jsLine.trim().endsWith('{')) indentStack.push(indent);
+      newLines.push(closeBraces + jsLine);
     }
     let remainingBraces = '';
     while (indentStack.length > 0) { indentStack.pop(); remainingBraces += '} '; }
@@ -60,30 +59,139 @@ const transpileToJS = (rawCode, language) => {
   }
 
   if (language === 'java' || language === 'cpp') {
-      for (let i = 0; i < lines.length; i++) {
-          let jsLine = lines[i];
-          let stripped = jsLine.trim();
-          if (stripped.match(/^(#include|using\s+namespace|package\s|import\s|namespace\s|#define)/)) { newLines.push('// ' + jsLine); continue; }
-          if (jsLine.includes('cout')) {
-              let parts = jsLine.split('<<').map(p => p.replace('cout', '').replace(/endl/g, '').replace(';', '').trim()).filter(p => !!p);
-              if (parts.length > 0) { jsLine = `console.log(${parts.join(', ')});`; }
-          }
-          jsLine = jsLine.replace(/\b(?:std::)?vector<\w+>\s+(\w+)\s*=\s*\{(.*?)\}\s*;/g, 'let $1 = [$2];');
-          jsLine = jsLine.replace(/\b(?:int|float|double|boolean|bool|long|String)\s+(?:\[\]\s*)?(\w+)(?:\s*\[\])?\s*=\s*\{(.*?)\}\s*;/g, 'let $1 = [$2];');
-          jsLine = jsLine.replace(/\b(?:int|float|double|boolean|bool|long|char|String|auto|Node|Tree)\s+(\w+)\s*=/g, 'let $1 =');
-          jsLine = jsLine.replace(/\b(?:int|float|double|boolean|bool|long|char|String|auto)\s+(\w+)\s*;/g, 'let $1;');
-          jsLine = jsLine.replace(/\bSystem\.out\.print(?:ln)?\((.*?)\)\s*;/g, 'console.log($1);');
-          jsLine = jsLine.replace(/\.(push_back|add)\(/g, '.push(');
-          jsLine = jsLine.replace(/\.(size|length)\(\)/g, '.length');
-          jsLine = jsLine.replace(/\bpublic\s+class\s+\w+\s*\{/g, '/* class wrapper */ {');
-          jsLine = jsLine.replace(/\b(?:public\s+)?(?:static\s+)?(?:void|int)\s+main\s*\(.*?\)\s*\{/g, 'function main() {');
-          newLines.push(jsLine);
+    for (let i = 0; i < lines.length; i++) {
+      let jsLine = lines[i];
+      let stripped = jsLine.trim();
+      if (stripped.match(/^(#include|using\s+namespace|package\s|import\s|namespace\s|#define)/)) { newLines.push('// ' + jsLine); continue; }
+      if (jsLine.includes('cout')) {
+        let parts = jsLine.split('<<').map(p => p.replace('cout', '').replace(/endl/g, '').replace(';', '').trim()).filter(p => !!p);
+        if (parts.length > 0) { jsLine = `console.log(${parts.join(', ')});`; }
       }
-      let finalCode = newLines.join('\n');
-      if (finalCode.includes('function main()')) finalCode += '\nmain();';
-      return finalCode;
+      jsLine = jsLine.replace(/\b(?:std::)?vector<\w+>\s+(\w+)\s*=\s*\{(.*?)\}\s*;/g, 'let $1 = [$2];');
+      jsLine = jsLine.replace(/\b(?:int|float|double|boolean|bool|long|String)\s+(?:\[\]\s*)?(\w+)(?:\s*\[\])?\s*=\s*\{(.*?)\}\s*;/g, 'let $1 = [$2];');
+      jsLine = jsLine.replace(/\b(?:int|float|double|boolean|bool|long|char|String|auto|Node|Tree)\s+(\w+)\s*=/g, 'let $1 =');
+      jsLine = jsLine.replace(/\b(?:int|float|double|boolean|bool|long|char|String|auto)\s+(\w+)\s*;/g, 'let $1;');
+      jsLine = jsLine.replace(/\bSystem\.out\.print(?:ln)?\((.*?)\)\s*;/g, 'console.log($1);');
+      jsLine = jsLine.replace(/\.(push_back|add)\(/g, '.push(');
+      jsLine = jsLine.replace(/\.(size|length)\(\)/g, '.length');
+      jsLine = jsLine.replace(/\bpublic\s+class\s+\w+\s*\{/g, '/* class wrapper */ {');
+      jsLine = jsLine.replace(/\b(?:public\s+)?(?:static\s+)?(?:void|int)\s+main\s*\(.*?\)\s*\{/g, 'function main() {');
+      newLines.push(jsLine);
+    }
+    let finalCode = newLines.join('\n');
+    if (finalCode.includes('function main()')) finalCode += '\nmain();';
+    return finalCode;
   }
   return rawCode;
+};
+
+const detectLanguageFromText = (text) => {
+  const lower = text.toLowerCase();
+  if (lower.includes('#include') || lower.includes('std::') || lower.includes('cout <<')) return 'cpp';
+  if (lower.includes('public static void main') || lower.includes('system.out.print')) return 'java';
+  if (text.match(/\bdef\s+\w+\(/) || text.match(/\bimport\s+math\b/) || (lower.includes('print(') && !lower.includes('console.log'))) return 'python';
+  if (lower.includes('let ') || lower.includes('const ') || lower.includes('console.log') || lower.includes('function ')) return 'javascript';
+  return 'javascript';
+};
+
+const formatPythonIndentation = (text) => {
+  const rawLines = text.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+  const indentToken = '    ';
+  let level = 0;
+  const formatted = [];
+
+  for (const raw of rawLines) {
+    const line = raw.replace(/\t/g, '    ');
+    const dedentStarts = /^(elif|else|except|finally)\b/.test(line);
+    if (dedentStarts) {
+      level = Math.max(0, level - 1);
+    }
+
+    formatted.push(`${indentToken.repeat(level)}${line}`);
+
+    if (line.endsWith(':') && !line.startsWith('#')) {
+      level += 1;
+    }
+  }
+
+  return formatted.join('\n');
+};
+
+const formatBraceIndentation = (text) => {
+  const rawLines = text.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+  const indentToken = '    ';
+  let level = 0;
+  const formatted = [];
+
+  for (const raw of rawLines) {
+    const closes = (raw.match(/}/g) || []).length;
+    const opens = (raw.match(/{/g) || []).length;
+    const startsWithClose = raw.startsWith('}');
+
+    if (startsWithClose || closes > opens) {
+      level = Math.max(0, level - 1);
+    }
+
+    formatted.push(`${indentToken.repeat(level)}${raw}`);
+
+    if (opens > closes) {
+      level += opens - closes;
+    }
+  }
+
+  return formatted.join('\n');
+};
+
+const normalizeScannedCode = (rawText, detectedLanguage) => {
+  const cleaned = rawText
+    .replace(/\r\n?/g, '\n')
+    .replace(/‘|’|`|´/g, "'")
+    .replace(/“|”/g, '"')
+    .replace(/\s@\s/g, ' 0 ')
+    .replace(/[ \t]+$/gm, '');
+
+  if (detectedLanguage === 'python') {
+    return formatPythonIndentation(cleaned);
+  }
+
+  return formatBraceIndentation(cleaned);
+};
+
+const autoRepairPythonEntrypoint = (sourceCode) => {
+  const lines = sourceCode.split('\n');
+  const nonEmptyIndexes = lines
+    .map((line, idx) => ({ line, idx }))
+    .filter(({ line }) => line.trim().length > 0)
+    .map(({ idx }) => idx);
+
+  if (nonEmptyIndexes.length === 0) {
+    return sourceCode;
+  }
+
+  const hasDefOrClass = lines.some((line) => /^\s*(def|class)\s+/.test(line));
+  if (!hasDefOrClass) {
+    return sourceCode;
+  }
+
+  const lastIndex = nonEmptyIndexes[nonEmptyIndexes.length - 1];
+  const lastLine = lines[lastIndex];
+  const trimmedLast = lastLine.trim();
+  const lastIndent = lastLine.match(/^\s*/)?.[0]?.length || 0;
+
+  // If the scanned snippet ends with an executable statement inside an indented block,
+  // it is often an OCR indentation artifact. Move it to top-level as a recovery strategy.
+  if (
+    lastIndent > 0 &&
+    trimmedLast.length > 0 &&
+    !trimmedLast.endsWith(':') &&
+    !/^#/.test(trimmedLast)
+  ) {
+    const repaired = [...lines];
+    repaired[lastIndex] = trimmedLast;
+    return repaired.join('\n');
+  }
+
+  return sourceCode;
 };
 
 // ==================== EXECUTION ENGINE ====================
@@ -103,18 +211,18 @@ const compileAndRun = (rawCode, language) => {
   const code = transpileToJS(rawCode, language);
   const history = [];
   let variablesSet = new Set();
-  
+
   if (!window.Babel) throw new Error("Babel standalone is not loaded.");
 
-  const extractVarsPlugin = function() {
+  const extractVarsPlugin = function () {
     return {
       visitor: {
         Identifier(path) {
-          if (path.parentPath.isVariableDeclarator({ id: path.node }) || 
-              path.parentPath.isFunctionDeclaration({ id: path.node }) ||
-              path.parentPath.isAssignmentExpression({ left: path.node }) ||
-              path.parentPath.isClassDeclaration({ id: path.node })) {
-                variablesSet.add(path.node.name);
+          if (path.parentPath.isVariableDeclarator({ id: path.node }) ||
+            path.parentPath.isFunctionDeclaration({ id: path.node }) ||
+            path.parentPath.isAssignmentExpression({ left: path.node }) ||
+            path.parentPath.isClassDeclaration({ id: path.node })) {
+            variablesSet.add(path.node.name);
           }
         }
       }
@@ -129,7 +237,7 @@ const compileAndRun = (rawCode, language) => {
   const vars = [...variablesSet].filter(v => !reserved.has(v));
   const varsObjString = "({ " + vars.map(v => `"${v}": (() => { try { return __clone(${v}); } catch(e) { return undefined; } })()`).join(", ") + " })";
 
-  const instrumentPlugin = function({ types: t }) {
+  const instrumentPlugin = function ({ types: t }) {
     return {
       visitor: {
         Statement(path) {
@@ -141,7 +249,7 @@ const compileAndRun = (rawCode, language) => {
             const traceStmt = t.expressionStatement(t.callExpression(t.identifier('__trace'), [t.numericLiteral(line), t.callExpression(t.identifier('eval'), [t.stringLiteral(varsObjString)])]));
             traceStmt.__injected = true;
             path.insertAfter(traceStmt);
-          } catch(e) { console.error(e); }
+          } catch (e) { console.error(e); }
         }
       }
     };
@@ -150,11 +258,11 @@ const compileAndRun = (rawCode, language) => {
   let instrumentedCode = "";
   try {
     instrumentedCode = window.Babel.transform(code, { plugins: [instrumentPlugin], filename: 'visualizer.js' }).code;
-  } catch(e) { throw new Error("Instrumentation Error: " + e.message); }
+  } catch (e) { throw new Error("Instrumentation Error: " + e.message); }
 
   let currentOutput = [];
   let stepCount = 0;
-  
+
   const __trace = (line, scope) => {
     if (stepCount++ > 3000) throw new Error("Infinite loop detected.");
     const variables = {};
@@ -165,9 +273,9 @@ const compileAndRun = (rawCode, language) => {
       if (val === undefined || typeof val === 'function') continue;
       if (Array.isArray(val)) { memoryStructures.arrays[key] = val; }
       else if (typeof val === 'object' && val !== null) {
-         if ('left' in val || 'right' in val || 'value' in val || 'val' in val) memoryStructures.trees[key] = val;
-         else if ('next' in val) memoryStructures.graphs[key] = val;
-         else variables[key] = val;
+        if ('left' in val || 'right' in val || 'value' in val || 'val' in val) memoryStructures.trees[key] = val;
+        else if ('next' in val) memoryStructures.graphs[key] = val;
+        else variables[key] = val;
       } else variables[key] = val;
     }
 
@@ -190,6 +298,7 @@ const compileAndRun = (rawCode, language) => {
 
   const fakeConsole = { log: (...args) => { currentOutput.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')); } };
   try {
+    // eslint-disable-next-line no-new-func
     const fn = new Function('__trace', '__clone', 'console', instrumentedCode);
     fn(__trace, __clone, fakeConsole);
   } catch (e) { if (history.length === 0) throw e; }
@@ -204,14 +313,14 @@ const GlassArray = ({ name, arr, isXRay }) => (
     <div className="iso-array">
       {arr.map((val, idx) => (
         <div key={idx} className="iso-array-cell">
-           <div className="iso-cell-value">{typeof val === 'object' ? '{...}' : String(val)}</div>
-           <div className="iso-cell-index">{idx}</div>
-           {isXRay && (
-             <div className="iso-xray-details">
-                <div className="xray-hex">0x{ (1024 + idx * 8).toString(16).toUpperCase() }</div>
-                <div className="xray-bin">{ Number(val).toString(2).padStart(8, '0').slice(-8) }</div>
-             </div>
-           )}
+          <div className="iso-cell-value">{typeof val === 'object' ? '{...}' : String(val)}</div>
+          <div className="iso-cell-index">{idx}</div>
+          {isXRay && (
+            <div className="iso-xray-details">
+              <div className="xray-hex">0x{(1024 + idx * 8).toString(16).toUpperCase()}</div>
+              <div className="xray-bin">{Number(val).toString(2).padStart(8, '0').slice(-8)}</div>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -255,25 +364,41 @@ const CodeVisualizer = () => {
   const [tokens, setTokens] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(1000);
+  const [speed] = useState(1000);
   const [error, setError] = useState(null);
   const [isXRay, setIsXRay] = useState(false);
   const [isGhosting, setIsGhosting] = useState(true);
-  
+
   const [isScanning, setIsScanning] = useState(false);
   const [ocrWarning, setOcrWarning] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  
+
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const performCompilation = useCallback(() => {
     try {
-      const steps = compileAndRun(code, language);
+      let steps = compileAndRun(code, language);
+
+      if (steps.length === 0 && language === 'python') {
+        const repairedCode = autoRepairPythonEntrypoint(code);
+        if (repairedCode !== code) {
+          try {
+            const repairedSteps = compileAndRun(repairedCode, language);
+            if (repairedSteps.length > 0) {
+              steps = repairedSteps;
+              setCode(repairedCode);
+            }
+          } catch (repairError) {
+            // Keep the original compilation result and surface the normal error path if needed.
+          }
+        }
+      }
+
       setTokens(steps);
       setError(null);
       return steps;
-    } catch(e) { setError(e.message); setTokens([]); return []; }
+    } catch (e) { setError(e.message); setTokens([]); return []; }
   }, [code, language]);
 
   const reset = useCallback(() => { setCurrentStep(0); setIsPlaying(false); if (timerRef.current) clearInterval(timerRef.current); }, []);
@@ -293,7 +418,17 @@ const CodeVisualizer = () => {
       }, speed);
       return () => clearInterval(timerRef.current);
     }
-  }, [isPlaying, speed, tokens.length]);
+  }, [isPlaying, speed, tokens]);
+
+  const handleStepForward = () => {
+    setIsPlaying(false);
+    setCurrentStep((prev) => Math.min(tokens.length - 1, prev + 1));
+  };
+
+  const handleStepBack = () => {
+    setIsPlaying(false);
+    setCurrentStep((prev) => Math.max(0, prev - 1));
+  };
 
   const currentState = tokens[currentStep];
   const ghostStep = (isGhosting && currentStep > 0) ? tokens[currentStep - 1] : null;
@@ -308,7 +443,9 @@ const CodeVisualizer = () => {
       const { data } = await worker.recognize(file, 'eng');
       const lowConf = data.words.filter(w => w.confidence < 60);
       if (lowConf.length > 5) setOcrWarning(`OCR extraction confidence low. Verify ${lowConf.length} tokens.`);
-      setCode(data.text.replace(/‘|’|`|´/g, "'").replace(/“|”/g, '"').replace(/\s@\s/g, ' 0 '));
+      const detectedLanguage = detectLanguageFromText(data.text || '');
+      setLanguage(detectedLanguage);
+      setCode(normalizeScannedCode(data.text || '', detectedLanguage));
     } catch (err) { setError('OCR Failed: ' + err.message); } finally {
       setIsScanning(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -317,17 +454,8 @@ const CodeVisualizer = () => {
 
   // AUTO-LANGUAGE DETECTION
   useEffect(() => {
-    const detectLanguage = (text) => {
-      const lower = text.toLowerCase();
-      if (lower.includes('#include') || lower.includes('std::') || lower.includes('cout <<')) return 'cpp';
-      if (lower.includes('public static void main') || lower.includes('system.out.print')) return 'java';
-      if (text.match(/\bdef\s+\w+\(/) || text.match(/\bimport\s+math\b/) || (lower.includes('print(') && !lower.includes('console.log'))) return 'python';
-      if (lower.includes('let ') || lower.includes('const ') || lower.includes('console.log') || lower.includes('function ')) return 'javascript';
-      return null;
-    };
-
     const timeoutId = setTimeout(() => {
-      const detected = detectLanguage(code);
+      const detected = detectLanguageFromText(code);
       if (detected && detected !== language) {
         setLanguage(detected);
       }
@@ -338,7 +466,7 @@ const CodeVisualizer = () => {
   return (
     <div className="cv-container">
       <div className="cv-inner">
-        <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} className="cv-header">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="cv-header">
           <Terminal className="cv-icon-terminal" size={32} />
           <div>
             <h1>Mandate: Optical Execution Engine</h1>
@@ -347,14 +475,14 @@ const CodeVisualizer = () => {
         </motion.div>
 
         <div className="cv-grid">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="cv-col-stack">
             <div className="cv-panel">
               <div className="cv-panel-header">
                 <div className="cv-panel-title"><Code size={16} /> Source Code</div>
-                <div style={{display:'flex', gap:'10px'}}>
-                  <input type="file" ref={fileInputRef} onChange={handleScanImage} accept="image/*" style={{display:'none'}} />
+                <div className="cv-panel-actions">
+                  <input type="file" ref={fileInputRef} onChange={handleScanImage} accept="image/*" className="cv-file-input-hidden" />
                   <button onClick={() => fileInputRef.current?.click()} className="cv-btn-icon highlight-camera" disabled={isScanning}>
-                    {isScanning ? <RefreshCw className="spin" size={16} /> : <Camera size={16} />} <span style={{marginLeft:'5px'}}>Scan</span>
+                    {isScanning ? <RefreshCw className="spin" size={16} /> : <Camera size={16} />} <span className="scan-label-gap">Scan</span>
                   </button>
                   <select value={language} onChange={e => setLanguage(e.target.value)} className="cv-language-select">
                     <option value="javascript">JS</option><option value="python">Py</option><option value="java">Java</option><option value="cpp">C++</option>
@@ -371,87 +499,87 @@ const CodeVisualizer = () => {
                 </div>
                 <textarea value={code} onChange={e => setCode(e.target.value)} className="code-input-layer" spellCheck="false" />
               </div>
-              {ocrWarning && <div className="ocr-warning"><AlertCircle size={14}/> {ocrWarning}</div>}
-              {error && <div className="cv-error"><AlertCircle size={16}/> {error}</div>}
+              {ocrWarning && <div className="ocr-warning"><AlertCircle size={14} /> {ocrWarning}</div>}
+              {error && <div className="cv-error"><AlertCircle size={16} /> {error}</div>}
             </div>
 
             <div className="cv-panel">
-               <div className="cv-controls">
-                  <button className="cv-btn cv-btn-secondary" onClick={() => setIsXRay(!isXRay)} style={{color: isXRay ? '#FCEE09' : '#0FF0FC'}}><Eye size={16}/> X-Ray</button>
-                  <button className="cv-btn cv-btn-secondary" onClick={() => setIsGhosting(!isGhosting)} style={{color: isGhosting ? '#FF003C' : '#0FF0FC'}}><Ghost size={16}/> Ghost</button>
-                  <button className="cv-btn cv-btn-secondary" onClick={reset}><RotateCcw size={16}/> Reset</button>
-                  <button className="cv-btn cv-btn-warning" onClick={() => { setIsPlaying(false); setCurrentStep(Math.max(0, currentStep - 1)) }} disabled={currentStep === 0}><SkipBack size={16}/> Undo</button>
-                  {isPlaying ? (
-                    <button className="cv-btn cv-btn-warning" onClick={() => setIsPlaying(false)}><Pause size={16}/> Pause</button>
-                  ) : (
-                    <button className="cv-btn cv-btn-primary" onClick={() => setIsPlaying(true)} disabled={currentStep >= tokens.length - 1}><Play size={16}/> Play</button>
-                  )}
-                  <button className="cv-btn cv-btn-secondary" onClick={() => { setIsPlaying(false); setCurrentStep(Math.min(tokens.length - 1, currentStep + 1)) }} disabled={currentStep >= tokens.length - 1}><SkipForward size={16}/> Step</button>
-               </div>
-               <div className="cv-progress-container">
-                  <div className="cv-progress-text">
-                     <span>Trace Step {currentStep + 1} / {tokens.length || 1}</span>
-                     <span>{tokens.length ? Math.round(((currentStep+1)/tokens.length)*100) : 0}%</span>
-                  </div>
-                  <div className="cv-progress-bar"><div className="cv-progress-fill" style={{width: `${tokens.length ? ((currentStep+1)/tokens.length)*100 : 0}%`}}></div></div>
-               </div>
+              <div className="cv-controls">
+                <button className={`cv-btn cv-btn-secondary ${isXRay ? 'cv-state-xray' : ''}`} onClick={() => setIsXRay(!isXRay)} aria-pressed={isXRay}><Eye size={16} /> X-Ray</button>
+                <button className={`cv-btn cv-btn-secondary ${isGhosting ? 'cv-state-ghost' : ''}`} onClick={() => setIsGhosting(!isGhosting)} aria-pressed={isGhosting}><Ghost size={16} /> Ghost</button>
+                <button className="cv-btn cv-btn-secondary" onClick={reset}><RotateCcw size={16} /> Reset</button>
+                <button className="cv-btn cv-btn-warning" onClick={handleStepBack} disabled={currentStep === 0}><SkipBack size={16} /> Undo</button>
+                {isPlaying ? (
+                  <button className="cv-btn cv-btn-warning" onClick={() => setIsPlaying(false)} aria-pressed={true}><Pause size={16} /> Pause</button>
+                ) : (
+                  <button className="cv-btn cv-btn-primary" onClick={() => setIsPlaying(true)} disabled={currentStep >= tokens.length - 1} aria-pressed={false}><Play size={16} /> Play</button>
+                )}
+                <button className="cv-btn cv-btn-secondary" onClick={handleStepForward} disabled={currentStep >= tokens.length - 1}><SkipForward size={16} /> Step</button>
+              </div>
+              <div className="cv-progress-container">
+                <div className="cv-progress-text">
+                  <span>Trace Step {currentStep + 1} / {tokens.length || 1}</span>
+                  <span>{tokens.length ? Math.round(((currentStep + 1) / tokens.length) * 100) : 0}%</span>
+                </div>
+                <div className="cv-progress-bar"><div className="cv-progress-fill" style={{ width: `${tokens.length ? ((currentStep + 1) / tokens.length) * 100 : 0}%` }}></div></div>
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-             <div className="cv-panel execution-tracker">
-                <div className="cv-panel-title" style={{justifyContent: 'space-between'}}>
-                   <div style={{display:'flex', alignItems:'center', gap: '8px'}}><Activity size={16}/> Execution Trace</div>
-                   <div className="why-indicator" onMouseEnter={() => setShowExplanation(true)} onMouseLeave={() => setShowExplanation(false)}>
-                      <Info size={18} color="#FCEE09" style={{cursor:'help'}}/>
-                      <AnimatePresence>
-                        {showExplanation && (
-                          <motion.div initial={{opacity:0, scale:0.8}} animate={{opacity:1, scale:1}} exit={{opacity:0}} className="why-popup">
-                            <div className="why-title">ALGORITHMIC JUSTIFICATION</div>
-                            <div className="why-text">{currentState?.why || "Processing logical compute."}</div>
-                          </motion.div>
+          <div className="cv-col-stack">
+            <div className="cv-panel execution-tracker">
+              <div className="cv-panel-title cv-panel-title-spread">
+                <div className="cv-inline-title"><Activity size={16} /> Execution Trace</div>
+                <div className="why-indicator" onMouseEnter={() => setShowExplanation(true)} onMouseLeave={() => setShowExplanation(false)}>
+                  <Info size={18} color="#FCEE09" className="cv-help-icon" />
+                  <AnimatePresence>
+                    {showExplanation && (
+                      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="why-popup">
+                        <div className="why-title">ALGORITHMIC JUSTIFICATION</div>
+                        <div className="why-text">{currentState?.why || "Processing logical compute."}</div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+              <div className="cv-code-block cv-code-block-spaced">
+                {currentState ? `[L${currentState.line}] :: ${currentState.code}` : "AWAITING COMPILATION..."}
+              </div>
+            </div>
+
+            {currentState && (
+              <>
+                <div className="cv-panel memory-mapper cv-relative-panel">
+                  <div className="cv-panel-title"><Layers size={16} /> Memory Heap Topology</div>
+                  <div className="render-canvas">
+                    <div className="visual-layers-stack">
+                      {/* Ghost Layer */}
+                      <div className="layer ghost-layer" style={{ display: isGhosting && ghostStep ? 'block' : 'none' }}>
+                        {ghostStep && (
+                          <>
+                            {Object.entries(ghostStep.memoryStructures.arrays).map(([name, arr]) => <GlassArray key={name} name={name} arr={arr} isXRay={isXRay} />)}
+                            {Object.entries(ghostStep.memoryStructures.trees).map(([name, node]) => <GlassTree key={name} name={name} node={node} isXRay={isXRay} />)}
+                          </>
                         )}
-                      </AnimatePresence>
-                   </div>
-                </div>
-                <div className="cv-code-block" style={{marginTop:'10px', fontSize:'14px'}}>
-                   {currentState ? `[L${currentState.line}] :: ${currentState.code}` : "AWAITING COMPILATION..."}
-                </div>
-             </div>
-
-             {currentState && (
-               <>
-                 <div className="cv-panel memory-mapper" style={{position:'relative'}}>
-                    <div className="cv-panel-title"><Layers size={16}/> Memory Heap Topology</div>
-                    <div className="render-canvas">
-                        <div className="visual-layers-stack">
-                           {/* Ghost Layer */}
-                           <div className="layer ghost-layer" style={{ display: isGhosting && ghostStep ? 'block' : 'none' }}>
-                              {ghostStep && (
-                                <>
-                                  {Object.entries(ghostStep.memoryStructures.arrays).map(([name, arr]) => <GlassArray key={name} name={name} arr={arr} isXRay={isXRay} />)}
-                                  {Object.entries(ghostStep.memoryStructures.trees).map(([name, node]) => <GlassTree key={name} name={name} node={node} isXRay={isXRay} />)}
-                                </>
-                              )}
-                           </div>
-                           {/* Current Layer */}
-                           <div className="layer current-layer">
-                              {Object.entries(currentState.memoryStructures.arrays).map(([name, arr]) => <GlassArray key={name} name={name} arr={arr} isXRay={isXRay} />)}
-                              {Object.entries(currentState.memoryStructures.trees).map(([name, node]) => <GlassTree key={name} name={name} node={node} isXRay={isXRay} />)}
-                           </div>
-                        </div>
+                      </div>
+                      {/* Current Layer */}
+                      <div className="layer current-layer">
+                        {Object.entries(currentState.memoryStructures.arrays).map(([name, arr]) => <GlassArray key={name} name={name} arr={arr} isXRay={isXRay} />)}
+                        {Object.entries(currentState.memoryStructures.trees).map(([name, node]) => <GlassTree key={name} name={name} node={node} isXRay={isXRay} />)}
+                      </div>
                     </div>
-                 </div>
+                  </div>
+                </div>
 
-                 {currentState.output.length > 0 && (
-                   <div className="cv-panel"><div className="cv-panel-title"><Terminal size={16}/> Console Log</div>
-                     <div className="cv-console">
-                        {currentState.output.map((out, i) => (<div key={i} className="cv-console-line"><span className="cv-console-prompt">$</span> <span className="cv-console-text">{out}</span></div>))}
-                     </div>
-                   </div>
-                 )}
-               </>
-             )}
+                {currentState.output.length > 0 && (
+                  <div className="cv-panel"><div className="cv-panel-title"><Terminal size={16} /> Console Log</div>
+                    <div className="cv-console" role="log" aria-live="polite">
+                      {currentState.output.map((out, i) => (<div key={i} className="cv-console-line"><span className="cv-console-prompt">$</span> <span className="cv-console-text">{out}</span></div>))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

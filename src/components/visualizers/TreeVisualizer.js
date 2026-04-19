@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const TreeVisualizer = ({ data, foundIndex }) => {
+const TreeVisualizer = ({ data, foundIndex, xRayMode, memoryModel, ghostData }) => {
   // Build tree levels (assuming complete binary tree)
   const levels = [];
   let index = 0;
   let levelSize = 1;
-  
+
   while (index < data.length) {
     const level = [];
     for (let i = 0; i < levelSize && index < data.length; i++) {
@@ -25,6 +25,11 @@ const TreeVisualizer = ({ data, foundIndex }) => {
       gap: '40px',
       padding: '40px',
     }}>
+      {xRayMode && (
+        <div style={{ fontSize: '11px', color: '#86efac' }}>
+          root addr: {memoryModel?.cells?.[0]?.address || 'n/a'}
+        </div>
+      )}
       {levels.map((level, levelIndex) => (
         <div
           key={levelIndex}
@@ -36,16 +41,16 @@ const TreeVisualizer = ({ data, foundIndex }) => {
         >
           {level.map((item, idx) => {
             const isFound = foundIndex === item.index;
-            
+
             return (
               <motion.div
                 key={`tree-${item.index}`}
                 initial={{ scale: 0, opacity: 0 }}
-                animate={{ 
-                  scale: isFound ? 1.2 : 1, 
-                  opacity: 1 
+                animate={{
+                  scale: isFound ? 1.2 : 1,
+                  opacity: 1
                 }}
-                transition={{ 
+                transition={{
                   type: "spring",
                   stiffness: 300,
                   damping: 20,
@@ -58,8 +63,8 @@ const TreeVisualizer = ({ data, foundIndex }) => {
                   background: isFound
                     ? 'linear-gradient(135deg, #10b981, #059669)'
                     : levelIndex === 0
-                    ? 'linear-gradient(135deg, #fbbf24, #d97706)'
-                    : 'linear-gradient(135deg, #b45309, #92400e)',
+                      ? 'linear-gradient(135deg, #fbbf24, #d97706)'
+                      : 'linear-gradient(135deg, #b45309, #92400e)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -69,9 +74,9 @@ const TreeVisualizer = ({ data, foundIndex }) => {
                   boxShadow: isFound
                     ? '0 0 30px rgba(16, 185, 129, 0.6)'
                     : levelIndex === 0
-                    ? '0 0 30px rgba(251, 191, 36, 0.4)'
-                    : '0 4px 15px rgba(180, 83, 9, 0.3)',
-                  border: isFound 
+                      ? '0 0 30px rgba(251, 191, 36, 0.4)'
+                      : '0 4px 15px rgba(180, 83, 9, 0.3)',
+                  border: isFound
                     ? '3px solid #34d399'
                     : '3px solid rgba(255, 255, 255, 0.2)',
                   transition: 'all 0.3s ease',
@@ -83,6 +88,12 @@ const TreeVisualizer = ({ data, foundIndex }) => {
           })}
         </div>
       ))}
+
+      {!!ghostData?.length && (
+        <div style={{ fontSize: '11px', opacity: 0.45, color: '#e2e8f0' }}>
+          ghost nodes: {ghostData.length}
+        </div>
+      )}
     </div>
   );
 };

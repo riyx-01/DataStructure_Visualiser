@@ -19,6 +19,7 @@ function App() {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : null;
   });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -27,6 +28,17 @@ function App() {
       localStorage.removeItem('currentUser');
     }
   }, [user]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 960) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!user) {
     return (
@@ -39,7 +51,13 @@ function App() {
   return (
     <Router>
       <div className="app">
-        <Sidebar user={user} setUser={setUser} />
+        <Sidebar
+          user={user}
+          setUser={setUser}
+          isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen((prev) => !prev)}
+          onClose={() => setIsSidebarOpen(false)}
+        />
         <div className="main-content with-sidebar">
           <AnimatePresence mode='wait'>
             <Routes>

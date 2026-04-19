@@ -1,267 +1,384 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;700&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
 
-.book-viewer-root {
-  height: 100vh;
-  width: 100vw;
-  background: #020508;
-  color: #FFF;
-  font-family: 'Share Tech Mono', monospace;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-}
-
-/* NAVBAR */
-.book-navbar {
-  height: 55px;
-  background: rgba(10, 15, 20, 0.98);
-  border-bottom: 2px solid #0FF0FC;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-  padding: 0 10px;
+:root {
+    --book-bg: #081016;
+    --book-surface: #111827;
+    --book-ink: #e5e7eb;
+    --book-muted: #94a3b8;
+    --book-accent: #22c55e;
+    --book-accent-2: #14b8a6;
+    --book-paper: #f8f7f2;
+    --book-paper-ink: #1f2937;
 }
 
-.navbar-content-guard {
-  width: 100%;
-  max-width: 1200px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+.book-reader-root {
+    min-height: 100dvh;
+    width: 100%;
+    background:
+        radial-gradient(circle at 20% 10%, rgba(34, 197, 94, 0.15), transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(20, 184, 166, 0.12), transparent 30%),
+        var(--book-bg);
+    color: var(--book-ink);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
 }
 
-.back-btn-skeuo, .tool-btn {
-  background: transparent;
-  border: 1px solid rgba(0, 243, 255, 0.2);
-  color: #0FF0FC;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 15px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 11px;
-  font-weight: bold;
-}
-.back-btn-skeuo:hover, .tool-btn:hover, .tool-btn.active {
-  background: #0FF0FC;
-  color: #000;
-  box-shadow: 0 0 10px #0FF0FC;
-}
-.tool-btn.reading { border-color: #FCEE09; color: #FCEE09; }
-
-.book-metadata-header { font-size: 13px; color: #FFF; letter-spacing: 3px; text-shadow: 0 0 5px #0FF0FC; }
-.book-tools { display: flex; gap: 10px; }
-
-/* STAGE & PHYSICAL STRUCTURE */
-.book-centering-container {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  perspective: 3000px;
-  background: radial-gradient(circle at center, rgba(0,243,255,0.03), transparent 70%);
-  overflow: hidden; /* Prevent overflow on resize */
+.book-reader-topbar {
+    height: 60px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(2, 6, 23, 0.78);
+    backdrop-filter: blur(8px);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
 }
 
-.book-physical-structure {
-  position: relative;
-  height: 72vh;
-  max-height: 680px;
-  transform-style: preserve-3d;
-  transition: width 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
-  display: flex;
-  justify-content: center;
+.book-topbar-title {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: #d1fae5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Stable centering: no translateX shift needed if we use flex/widths correctly */
-.is-closed {
-  width: min(450px, 90vw);
-}
-.is-opened {
-  width: min(950px, 95vw);
+.book-topbar-actions {
+    justify-self: end;
+    display: flex;
+    gap: 8px;
 }
 
-.physics-page {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  background: #fdfbf7;
-  transform-style: preserve-3d;
-  transition: all 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
-  backface-visibility: hidden;
+.book-btn {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: var(--book-ink);
+    background: rgba(15, 23, 42, 0.65);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 140ms ease;
 }
 
-/* Internal pages widths are 50% of parent when opened */
-.is-opened .physics-page { width: 50%; opacity: 1; pointer-events: auto; }
-/* Internal pages hidden when closed */
-.is-closed .physics-page { width: 100%; opacity: 0; pointer-events: none; }
-
-.physics-cover {
-  right: 0;
-  width: 100% !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  background: #0a0c10;
-  border: 4px solid #0FF0FC;
-  border-radius: 4px 10px 10px 4px;
-  z-index: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: left;
-}
-.is-opened .physics-cover {
-  width: 50% !important;
-  z-index: 10; /* Move cover behind internal pages when open */
+.book-btn:hover:not(:disabled) {
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #d1fae5;
+    transform: translateY(-1px);
 }
 
-.cover-inner-v3 {
-  text-align: center;
-  padding: 40px;
-}
-.cover-inner-v3 h1 { font-size: 2.8rem; letter-spacing: 6px; color: #FFF; line-height: 1.2; }
-.cover-hr-line { width: 80px; height: 3px; background: #0FF0FC; margin: 30px auto; }
-.cover-btm-hint { color: #FCEE09; margin-top: 60px; font-size: 11px; letter-spacing: 4px; animation: blink 2s infinite; }
-
-@keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-/* PAGE LAYOUTS */
-.page-left-internal { 
-  left: 0; 
-  width: 50%;
-  border-radius: 10px 0 0 10px; 
-  border: 1px solid #ddd; 
-  border-right: none; 
-  box-shadow: inset -30px 0 50px rgba(0,0,0,0.05);
-  z-index: 20; 
-}
-.page-right-internal { 
-  right: 0; 
-  width: 50%;
-  border-radius: 0 10px 10px 0; 
-  border: 1px solid #ddd; 
-  border-left: none; 
-  box-shadow: inset 30px 0 50px rgba(0,0,0,0.05); 
-  z-index: 15;
+.book-btn.active {
+    border-color: rgba(250, 204, 21, 0.7);
+    color: #fef08a;
+    box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.25);
 }
 
-.page-paper-surface {
-  padding: 40px 50px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: #1a1a1a;
-  overflow: hidden;
-  position: relative;
-}
-.page-paper-surface mark {
-  background: rgba(0, 243, 255, 0.4);
-  color: inherit;
-  border-radius: 2px;
+.book-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
-.p-header {
-  font-size: 11px;
-  color: #FF003C;
-  border-bottom: 2px solid #FF003C;
-  padding-bottom: 12px;
-  margin-bottom: 30px;
-  font-weight: 900;
-  letter-spacing: 2px;
+.book-btn.ghost {
+    justify-self: start;
 }
 
-.p-content {
-  font-family: 'Crimson Pro', serif;
-  font-size: 1.65rem;
-  line-height: 1.45;
-  color: #222;
+.book-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px 22px;
+    overflow: hidden;
 }
 
-.p-cite {
-  margin-top: auto;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: #999;
+.book-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #bbf7d0;
+    font-size: 12px;
 }
 
-.p-footer {
-  margin-top: 20px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 14px;
-  color: #0FF0FC;
-  text-align: center;
+.spin {
+    animation: spin 850ms linear infinite;
 }
 
-.book-spine-bridge {
-  position: absolute;
-  left: 50%; top: 0; bottom: 0;
-  width: 10px;
-  background: linear-gradient(90deg, #000, #333, #000);
-  transform: translateX(-50%);
-  z-index: 55;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-/* PAGINATION CONTROLS */
-.book-pagination-controls {
-  margin-top: 35px;
-  display: flex;
-  align-items: center;
-  gap: 50px;
-  z-index: 600;
+.book-load-warning {
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: #fef08a;
+    background: rgba(120, 53, 15, 0.28);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 10px;
+    padding: 8px 12px;
 }
-.pag-btn {
-  background: transparent;
-  border: 2px solid rgba(0, 243, 255, 0.4);
-  color: #0FF0FC;
-  width: 50px; height: 50px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: 0.3s;
+
+.book-shell {
+    width: min(1200px, 96vw);
+    height: min(74vh, 760px);
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: rgba(2, 6, 23, 0.48);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
 }
-.pag-btn:hover:not(:disabled) { background: #0FF0FC; color: #000; box-shadow: 0 0 15px #0FF0FC; }
-.pag-btn:disabled { opacity: 0.2; }
 
-.pag-info { font-size: 13px; color: #888; letter-spacing: 2px; }
-
-/* TOC MODAL */
-.toc-backdrop-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  backdrop-filter: blur(15px);
+.book-shell.closed {
+    width: min(440px, 94vw);
 }
-.toc-card {
-  background: #FFF;
-  width: 550px;
-  padding: 40px;
-  color: #000;
-  border-left: 10px solid #0FF0FC;
-  box-shadow: 20px 20px 0 rgba(0,0,0,1);
+
+.book-shell.compact.opened {
+    width: min(700px, 96vw);
 }
-.toc-card-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 3px solid #000; padding-bottom: 15px; }
-.toc-card-header h3 { font-size: 1.2rem; letter-spacing: 5px; }
 
-.toc-scroll { display: grid; gap: 15px; }
-.toc-entry { display: flex; align-items: baseline; cursor: pointer; transition: 150ms; }
-.toc-entry:hover { color: #FF003C; padding-left: 10px; }
-.toc-dot-line { flex: 1; border-bottom: 1px dotted #ccc; margin: 0 15px; }
+.book-cover {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background:
+        linear-gradient(145deg, rgba(17, 24, 39, 0.88), rgba(2, 6, 23, 0.96)),
+        radial-gradient(circle at 70% 20%, rgba(34, 197, 94, 0.25), transparent 40%);
+    color: #dcfce7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    cursor: pointer;
+}
 
-@media (max-width: 1200px) {
-  .book-physical-structure.is-opened { width: 95vw; }
-  .book-physical-structure.is-closed { width: 60vw; }
-  .p-content { font-size: 1.1rem; }
+.book-cover h2 {
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+    margin: 0;
+    text-align: center;
+    max-width: 84%;
+}
+
+.book-cover p {
+    margin: 0;
+    color: #86efac;
+    font-size: 12px;
+}
+
+.book-cover span {
+    margin-top: 12px;
+    border: 1px dashed rgba(134, 239, 172, 0.6);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 11px;
+}
+
+.book-pages-wrap {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.book-shell.compact .book-pages-wrap {
+    grid-template-columns: 1fr;
+}
+
+.book-page {
+    background: linear-gradient(180deg, #fbfaf6 0%, #f2efe6 100%);
+    color: var(--book-paper-ink);
+    border-inline: 1px solid #ddd8c7;
+    padding: clamp(16px, 2.8vw, 28px);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.book-page h4 {
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #c7c2ad;
+    font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+    color: #14532d;
+    letter-spacing: 0.01em;
+}
+
+.book-page p {
+    margin: 0;
+    font-family: 'Crimson Text', serif;
+    font-size: clamp(1rem, 1.7vw, 1.25rem);
+    line-height: 1.55;
+    overflow-y: auto;
+    padding-right: 6px;
+    flex: 1;
+}
+
+.book-page p::-webkit-scrollbar {
+    width: 8px;
+}
+
+.book-page p::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: rgba(31, 41, 55, 0.3);
+}
+
+.book-page footer {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #c7c2ad;
+    text-align: center;
+    font-size: 11px;
+    color: #374151;
+}
+
+.book-page-empty {
+    margin: auto;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.book-pagination {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--book-muted);
+}
+
+.book-toc-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    background: rgba(2, 6, 23, 0.78);
+    backdrop-filter: blur(7px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.book-toc-card {
+    width: min(760px, 96vw);
+    max-height: min(84vh, 760px);
+    overflow: hidden;
+    background: #f8fafc;
+    color: #0f172a;
+    border-radius: 16px;
+    border: 1px solid #cbd5e1;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.book-toc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.book-toc-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.book-toc-header button {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.book-toc-list {
+    overflow: auto;
+    padding: 10px;
+    display: grid;
+    gap: 8px;
+}
+
+.book-toc-item {
+    border: 1px solid #dbeafe;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 12px;
+    color: #1e293b;
+    gap: 10px;
+}
+
+.book-toc-item:hover {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+@media (max-width: 1040px) {
+    .book-reader-topbar {
+        grid-template-columns: 1fr auto;
+    }
+
+    .book-topbar-title {
+        display: none;
+    }
+
+    .book-shell {
+        height: min(72vh, 680px);
+    }
+}
+
+@media (max-width: 760px) {
+    .book-stage {
+        padding: 10px;
+    }
+
+    .book-shell {
+        width: 98vw;
+        height: min(76vh, 700px);
+        border-radius: 12px;
+    }
+
+    .book-btn {
+        padding: 7px 10px;
+        font-size: 10px;
+    }
+
+    .book-page {
+        padding: 14px 12px;
+    }
+
+    .book-pagination {
+        gap: 8px;
+        font-size: 11px;
+    }
+}
+
+.book-page mark {
+    background: rgba(250, 204, 21, 0.45);
+    color: inherit;
+    border-radius: 2px;
 }

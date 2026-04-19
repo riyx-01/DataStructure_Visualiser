@@ -14,7 +14,7 @@
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-image: 
+  background-image:
     linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
@@ -23,8 +23,13 @@
 }
 
 @keyframes gridMove {
-  0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
-  100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+  0% {
+    transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);
+  }
+
+  100% {
+    transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px);
+  }
 }
 
 .gradient-orb {
@@ -56,9 +61,9 @@
   background: rgba(11, 12, 16, 0.85);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 243, 255, 0.3);
-  padding: 48px;
+  padding: clamp(24px, 5vw, 48px);
   width: 100%;
-  max-width: 440px;
+  max-width: min(440px, 92vw);
   box-shadow: 0 0 30px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.05);
   clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
 }
@@ -66,7 +71,10 @@
 .login-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; width: 100px; height: 2px;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 2px;
   background: #0FF0FC;
   box-shadow: 0 0 10px #0FF0FC;
 }
@@ -132,6 +140,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-height: 48px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(0, 243, 255, 0.2);
   transition: all 0.2s;
@@ -169,7 +178,10 @@
   color: #A3B1C6;
   cursor: pointer;
 }
-.password-toggle:hover { color: #FFF; }
+
+.password-toggle:hover {
+  color: #FFF;
+}
 
 .form-options {
   display: flex;
@@ -195,6 +207,7 @@
   display: grid;
   place-content: center;
 }
+
 .remember-me input::before {
   content: "";
   width: 8px;
@@ -202,6 +215,7 @@
   transform: scale(0);
   background: #0FF0FC;
 }
+
 .remember-me input:checked::before {
   transform: scale(1);
 }
@@ -264,6 +278,7 @@
   text-decoration: none;
   margin-left: 4px;
 }
+
 .login-footer a:hover {
   text-shadow: 0 0 10px #0FF0FC;
 }
@@ -300,7 +315,9 @@
 }
 
 @media (max-width: 1200px) {
-  .login-features { display: none; }
+  .login-features {
+    display: none;
+  }
 }
 
 .login-error-msg {
@@ -326,4 +343,29 @@
   letter-spacing: 1px;
   font-family: inherit;
 }
-.toggle-auth:hover { text-shadow: 0 0 10px #0FF0FC; }
+
+.toggle-auth:hover {
+  text-shadow: 0 0 10px #0FF0FC;
+}
+
+.toggle-auth:focus-visible,
+.password-toggle:focus-visible,
+.login-btn:focus-visible {
+  outline: 2px solid #0FF0FC;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .login-header h1 {
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+
+  .login-form {
+    gap: 16px;
+  }
+
+  .login-btn {
+    letter-spacing: 2px;
+  }
+}

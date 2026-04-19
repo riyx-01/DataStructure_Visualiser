@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  LayoutGrid, 
-  Code, 
-  Trophy, 
+import {
+  LayoutGrid,
+  Code,
+  Trophy,
   TrendingUp,
   Play,
   BookOpen
@@ -49,7 +49,7 @@ const Dashboard = ({ user }) => {
 
   return (
     <div className="dashboard-container">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="dashboard-header"
@@ -84,8 +84,6 @@ const Dashboard = ({ user }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className="feature-card"
-            onClick={() => navigate(feature.path)}
-            style={{ cursor: 'pointer' }}
           >
             <div className="feature-icon" style={{ background: `${feature.color}20`, color: feature.color }}>
               <feature.icon size={28} />
@@ -95,7 +93,12 @@ const Dashboard = ({ user }) => {
               <p>{feature.description}</p>
               <div className="feature-footer">
                 <span className="feature-stats">{feature.stats}</span>
-                <button className="feature-btn" style={{ color: feature.color }}>
+                <button
+                  className="feature-btn"
+                  style={{ color: feature.color }}
+                  onClick={() => navigate(feature.path)}
+                  aria-label={`Open ${feature.title}`}
+                >
                   <Play size={16} /> Start
                 </button>
               </div>
@@ -105,7 +108,7 @@ const Dashboard = ({ user }) => {
       </div>
 
       <div className="dashboard-sections">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
@@ -117,8 +120,8 @@ const Dashboard = ({ user }) => {
           </h2>
           <div className="quick-links">
             {['Array', 'Stack', 'Queue', 'Linked List'].map((ds) => (
-              <button 
-                key={ds} 
+              <button
+                key={ds}
                 className="quick-link"
                 onClick={() => navigate(`/visualizer/${ds.toLowerCase().replace(' ', '')}`)}
               >
@@ -128,7 +131,7 @@ const Dashboard = ({ user }) => {
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}

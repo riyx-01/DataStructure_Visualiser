@@ -1,11 +1,11 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Code, 
-  Trophy, 
-  User, 
+import {
+  LayoutDashboard,
+  Code,
+  Trophy,
+  User,
   LogOut,
   Database,
   Menu,
@@ -13,9 +13,7 @@ import {
 } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar = ({ user, setUser }) => {
-  const location = useLocation();
-  
+const Sidebar = ({ user, setUser, isOpen, onToggle, onClose }) => {
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/code-visualizer', icon: Code, label: 'Code Visualizer' },
@@ -35,74 +33,86 @@ const Sidebar = ({ user, setUser }) => {
   ];
 
   return (
-    <motion.aside 
-      initial={{ x: -260 }}
-      animate={{ x: 0 }}
-      className="sidebar"
-    >
-      <div className="sidebar-header">
-        <div className="logo">
-          <div className="logo-icon">DS</div>
-          <div className="logo-text">
-            <span className="brand">DataStruct</span>
-            <span className="tagline">Learn Visually</span>
+    <>
+      <button
+        className="mobile-menu-toggle"
+        aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        onClick={onToggle}
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {isOpen && <div className="sidebar-backdrop" onClick={onClose} aria-hidden="true" />}
+
+      <motion.aside
+        initial={{ x: -260 }}
+        animate={{ x: 0 }}
+        className={`sidebar ${isOpen ? 'open' : ''}`}
+      >
+        <div className="sidebar-header">
+          <div className="logo">
+            <div className="logo-icon">DS</div>
+            <div className="logo-text">
+              <span className="brand">DataStruct</span>
+              <span className="tagline">Learn Visually</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="user-profile-mini">
-        <div className="avatar">{user?.name?.[0] || 'U'}</div>
-        <div className="user-info">
-          <span className="name">{user?.name || 'User'}</span>
-          <span className="email">{user?.email || 'user@example.com'}</span>
+        <div className="user-profile-mini">
+          <div className="avatar">{user?.name?.[0] || 'U'}</div>
+          <div className="user-info">
+            <span className="name">{user?.name || 'User'}</span>
+            <span className="email">{user?.email || 'user@example.com'}</span>
+          </div>
         </div>
-      </div>
 
-      <nav className="main-nav">
-        {menuItems.map((item) => (
-          <NavLink 
-            key={item.path} 
-            to={item.path}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          >
-            <item.icon size={20} />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      <div className="ds-section">
-        <h3>Data Structures</h3>
-        <div className="ds-list">
-          {dataStructures.map((ds) => (
-            <NavLink 
-              key={ds.path} 
-              to={ds.path}
-              className={({ isActive }) => `ds-item ${isActive ? 'active' : ''}`}
+        <nav className="main-nav">
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={onClose}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <Database size={16} />
-              <span>{ds.label}</span>
+              <item.icon size={20} aria-hidden="true" />
+              <span>{item.label}</span>
             </NavLink>
           ))}
-        </div>
-      </div>
+        </nav>
 
-      <div className="sidebar-footer" style={{ marginTop: 'auto', padding: '1rem' }}>
-        <button 
-          onClick={() => setUser(null)}
-          className="logout-btn"
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%',
-            padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.1)',
-            color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)',
-            borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 'bold'
-          }}
-        >
-          <LogOut size={20} />
-          <span>Sign Out</span>
-        </button>
-      </div>
-    </motion.aside>
+        <div className="ds-section">
+          <h3>Data Structures</h3>
+          <div className="ds-list">
+            {dataStructures.map((ds) => (
+              <NavLink
+                key={ds.path}
+                to={ds.path}
+                onClick={onClose}
+                className={({ isActive }) => `ds-item ${isActive ? 'active' : ''}`}
+              >
+                <Database size={16} aria-hidden="true" />
+                <span>{ds.label}</span>
+              </NavLink>
+            ))}
+          </div>
+        </div>
+
+        <div className="sidebar-footer">
+          <button
+            onClick={() => {
+              onClose();
+              setUser(null);
+            }}
+            className="logout-btn"
+            aria-label="Sign out"
+          >
+            <LogOut size={20} aria-hidden="true" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </motion.aside>
+    </>
   );
 };
 
